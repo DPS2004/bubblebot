@@ -1,9 +1,10 @@
 
-7
+8
 00000	0401	b	s	0	level number
 00001	00F7	b	s	0	player input
-00002	0203	b	s	0	x 1
-00003	0207	b	s	0	x 1
-00004	0210	b	s	0	enemy y 1
-00005	0228	b	s	0	enemy 2 y
-00006	0240	b	s	0	enemy 3 y
+00002	0210	b	s	0	enemy y 1
+00003	0228	b	s	0	enemy 2 y
+00004	0240	b	s	0	enemy 3 y
+00005	0203	b	u	0	player x
+00006	0200	b	u	0	player y
+00007	0167	b	u	0	jump status
