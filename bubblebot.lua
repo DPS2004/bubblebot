@@ -1,4 +1,4 @@
---bobble bot
+--bubble bot
 --by dps2004
 
 
@@ -12,8 +12,15 @@ _BLOCKINPUT = false
 _up,_down,_left,_right,_a,_b,_start,_select = 'up','down','left','right','A','B','start','select'
 inputkeys = {_up,_down,_left,_right,_a,_b,_start,_select}
 
+colors = {
+	green = {0,255,0,255},
+	cleargreen = {0,255,0,50},
+}
+
 valuefuncs = {
-	playerx = function() return memory.readbyteunsigned(0x0203) - 1 end
+	playerx = function() return memory.readbyteunsigned(0x0203) - 1 end,
+	playery = function() return memory.readbyteunsigned(0x0200)+15 end,
+	enemyy = function() return memory.readbyteunsigned(0x0240)+15 end
 }
 value = {}
 function newinput(pl)
@@ -86,7 +93,9 @@ end
 
 
 function draw()
-	gui.line(value.playerx,40,value.playerx + 16, 40,'green')
+	--gui.line(value.playerx,value.enemyy,value.playerx + 16, value.enemyy,'red')
+	--gui.line(value.playerx,value.playery,value.playerx + 16, value.playery,'green')
+	gui.rect(value.playerx,value.playery - 16,value.playerx+16,value.playery,colors.cleargreen)
 end
 
 
