@@ -6,6 +6,11 @@
 --config
 _MODE = "mousecontrol" --mousecontrol
 
+_MOUSE_CONTROL_OPTIONS = {
+	snaptofloor = true
+
+}
+
 _ROMNAME = "Bubble Bobble (USA).nes"
 _BLOCKINPUT = false
 
@@ -109,7 +114,7 @@ function newmap()
 	end
 	
 	function map:tile(x,y)
-		return self.tiles[x][y]
+		return self.tiles[x][y-3]
 	end
 	
 	function map:pxtile(x,y)
@@ -118,10 +123,10 @@ function newmap()
 	
 	function map:draw()
 		for x=0,31 do
-			for y=0,24 do
+			for y=3,27 do
 				local tile = self:tile(x,y)
 				if tile.solid then
-					gui.rect(x*8,(y+3)*8,x*8+8,(y+4)*8,colors.clearwhite)
+					gui.rect(x*8,(y)*8,x*8+8,(y+1)*8,colors.clearwhite)
 					
 				end
 			end
@@ -178,7 +183,30 @@ function newplayer()
 		
 		if _MODE == 'mousecontrol' then
 			self.target.x = value.mousex
-			self.target.y = value.mousey
+			if _MOUSE_CONTROL_OPTIONS.snaptofloor then
+				local xtile = math.floor(value.mousex/8)
+				local ytile = math.floor(value.mousey/8)+0
+				local loops = 0
+				while true do
+					local tile = map:tile(xtile,ytile)
+					
+					if tile and tile.solid then
+						break
+					end
+					ytile = ytile + 1
+					loops = loops + 1
+					if ytile > 30 then
+						ytile = 0
+					end
+					if loops > 60 then
+						ytile = 12
+						break
+					end
+				end
+				self.target.y = ytile * 8
+			else
+				self.target.y = value.mousey
+			end
 		else
 			self.target.x = self.x
 			self.target.y = self.y
@@ -220,6 +248,8 @@ function init()
 	map = newmap()
 	
 end
+
+savestate.registerload(function() map = newmap() end) --reload map on savestate load
 
 function main()
 	
