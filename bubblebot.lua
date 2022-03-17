@@ -95,8 +95,13 @@ function newmap()
 	print('making new map')
 	local map = {tiles = {}}
 	
+	
+	
+	--this code loads from the PPU, but does not account for fake tiles.
+	--[[
 	local mx = 0 -- 0-31
 	local my = 0 -- 0-24
+	
 	for i=0x2060,0x237f do
 		if not map.tiles[mx] then map.tiles[mx] = {} end
 		
@@ -112,6 +117,49 @@ function newmap()
 			my = my + 1
 		end
 	end
+	]]--
+	
+	local roof = (memory.readbyteunsigned(0x04ce) ~= 0x10) --check if roof has holes in it
+	
+	local holes = {9,10,11,12,19,20,21,22}
+	
+	local mx = 0 -- 0-31
+	local my = 1 -- 0-24
+	
+	for i=0x0500,0x07ff do
+		if not map.tiles[mx] then 
+			map.tiles[mx] = {}
+			if roof then 
+				map.tiles[mx][0] = {id = 0x00, solid = true}
+			else
+				local foundhole = false
+				for hi,hv in ipairs(holes) do
+					if hv == mx then
+						foundhole = true
+					end
+				end
+				if foundhole then
+					map.tiles[mx][0] = {id = 0x01, solid = false}
+				else
+					map.tiles[mx][0] = {id = 0x00, solid = true}
+				end
+			end
+			
+		end
+		
+		local rb = memory.readbyteunsigned(i)
+		local tile = {}
+		
+		tile.id = rb
+		tile.solid = (rb == 0x00)
+		map.tiles[mx][my] = tile
+		mx = mx + 1
+		if mx == 32 then
+			mx = 0
+			my = my + 1
+		end
+	end
+	
 	
 	function map:tile(x,y)
 		return self.tiles[x][y-3]
@@ -203,7 +251,7 @@ function newplayer()
 						break
 					end
 				end
-				self.target.y = ytile * 8
+				self.target.y = ytile * 8 - 1
 			else
 				self.target.y = value.mousey
 			end
@@ -262,9 +310,6 @@ function main()
 	
 	
 	--get past title screen
-	if frame == 5 then
-		map = newmap()
-	end
 	if frame == 248 or frame == 255 then
 		inp:press(_start)
 	end
@@ -286,7 +331,9 @@ end
 function draw()
 	
 	player:draw()
-	map:draw()
+	if frame > 261 then
+		map:draw()
+	end
 end
 
 
